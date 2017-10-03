@@ -1334,7 +1334,7 @@ function Get-PathCommandName
         $cmdVerb = Get-SingularizedValue -Name $opId
     }
 
-    if (-not (Get-Verb -Verb $cmdVerb))
+    if ($cmdNoun -and -not (Get-Verb -Verb $cmdVerb))
     {
         $UnapprovedVerb = $cmdVerb
         $message = $LocalizedData.UnapprovedVerb -f ($UnapprovedVerb)
@@ -1396,17 +1396,6 @@ function Get-PathCommandName
 
             if ($script:PSCommandVerbMap.ContainsKey($cmdVerb)) { 
                 $cmdVerb = $script:PSCommandVerbMap[$cmdVerb] -Split ',' | ForEach-Object { if($_.Trim()){ $_.Trim() } }
-            }
-
-            if (-1 -ne $beginningOfSuffix) {
-                # This is still empty when a verb match is found that is the entire string, but it might not be worth checking for that case and skipping the below operation
-                $cmdNounSuffix = $UnapprovedVerb.Substring($beginningOfSuffix)
-                # Add command noun suffix only when the current noun doesn't contain it or vice-versa. 
-                if(-not $cmdNoun -or (($cmdNoun -notmatch $cmdNounSuffix) -and ($cmdNounSuffix -notmatch $cmdNoun))) {
-                    $cmdNoun = $cmdNoun + (Get-PascalCasedString -Name $UnapprovedVerb.Substring($beginningOfSuffix))
-                } elseif($cmdNounSuffix -match $cmdNoun) {
-                    $cmdNoun = $cmdNounSuffix
-                }
             }
         }
     }

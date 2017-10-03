@@ -330,7 +330,7 @@ Describe "Tests for New-PSSwaggerMetadataFile cmdlet with x-ms-paths extension i
             $operationType = 'post'
                         
             $x_ps_cmdlet_info = @{
-                Name                = 'Test-ServiceNameAvailability'
+                Name                = 'Test-Service'
                 Description         = 'Checks whether or not the given Search service name is available for use. Search service names must be globally unique since they are part of the service URI (https://<name>.search.windows.net).'
                 DefaultParameterSet = 'Services_CheckNameAvailability'
                 GenerateCommand     = $true

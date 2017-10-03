@@ -182,7 +182,7 @@ Describe "Get/List tests" -Tag ScenarioTest {
     }
 }
 
-Describe "Optional parameter tests" -Tag ScenarioTest {
+Describe "Optional parameter tests" -Tag @('ScenarioTest','OptionalParameter') {
     BeforeAll {
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath ".." | Join-Path -ChildPath "PSSwagger" | Join-Path -ChildPath "PSSwaggerUtility" | `
                        Join-Path -ChildPath "PSSwaggerUtility.psd1") -Force
@@ -208,8 +208,8 @@ Describe "Optional parameter tests" -Tag ScenarioTest {
 
     Context "Optional parameter tests" {
         It "Generates cmdlet using optional query parameters (flavor only)" {
-            $results = Get-Cupcake -Flavor "chocolate"
-            $results.Length | should be 2
+            $results = Get-Cupcake -Flavor "chocolate" -Maker 'Bob'
+            $results.Length | should be 1
         }
 
         It "Generates cmdlet using optional query parameters (maker only)" {
@@ -223,12 +223,12 @@ Describe "Optional parameter tests" -Tag ScenarioTest {
         }
 
         It "Generates cmdlet using optional path parameters" {
-            $results = Get-CupcakeByMaker -Flavor "chocolate" -Maker "bob"
+            $results = Get-Cupcake -Flavor "chocolate" -Maker "bob"
             $results.Length | should be 1
         }
 
         It "Sets default value when specified in spec" {
-            $results = Get-CupcakeWithDefault -Maker "bob"
+            $results = Get-Cupcake -Maker "bob"
             $results.Length | should be 1
         }
 
@@ -488,11 +488,11 @@ Describe "AzureExtensions" -Tag @('AzureExtension','ScenarioTest') {
 
         It "Test basic parameter group" {
             # As long as this makes a proper request, the results don't matter
-            $results = Path-GroupTestParameter -Parm "test" -Parm2 "test2"
+            $results = Path-GroupTest -Parm "test" -Parm2 "test2"
         }
 
         It "Test parameter group of mixed local and global" {
-            $results = Mixed-GroupTestParameter -Parm "test" -MethodParameter "test2"
+            $results = Mixed-GroupTest -Parm "test" -MethodParameter "test2"
         }
 
         It "Test parameter group with postfix instead of name" {
@@ -500,19 +500,19 @@ Describe "AzureExtensions" -Tag @('AzureExtension','ScenarioTest') {
         }
 
         It "Test parameter group with neither postfix nor name" {
-            $results = No-GroupTestPostfixTest -Parm "test"
+            $results = Postfix-GroupTest -Parm "test"
         }
 
         It "Test parameter group when operation ID has no hyphens" {
-            $results = Group-TestsNoHyphen -Parm "test"
+            $results = GroupTestsNoHyphen -Parm "test"
         }
 
         It "Test parameter group with flattened parameters" {
-            $results = Flattened-GroupTestParm -Id "1000" -Flavor "chocolate"
+            $results = Flattened-GroupTest -Id "1000" -Flavor "chocolate"
         }
 
         It "Test when multiple parameter groups exist" {
-            $results = Multiple-GroupTestGroup -parm "test" -parm2 "test2"
+            $results = Multiple-GroupTest -parm "test" -parm2 "test2"
         }
 
         It "Test long running operation with AsJob" {
@@ -528,10 +528,10 @@ Describe "AzureExtensions" -Tag @('AzureExtension','ScenarioTest') {
         }
 
         It "Test x-ms-paths generated cmdlets" {
-            $results = Get-CupcakeById -Id 1
+            $results = Get-Cupcake -Id 1
             $results.Count | should be 1
 
-            $results = Get-CupcakeByFlavor -Flavor 'vanilla'
+            $results = Get-Cupcake -Flavor 'vanilla'
             $results.Count | should be 1
         }
 
@@ -704,7 +704,7 @@ Describe "AuthTests" -Tag @('Auth','ScenarioTest') {
             try {
                 $processes = Start-JsonServer -TestRootPath $PSScriptRoot -TestApiName "AuthTests" -TestMiddlewareFileNames 'AuthTestMiddlewareNoChallenge.js' `
                                               -CustomServerParameters "--auth .\BasicAuthAltCreds.js" # Contains function to verify a hardcoded basic auth header
-                Get-ResponseUnchallenged -Credential $creds -Property "test"
+                Get-Response -Credential $creds -Property "test"
             }
             finally {
                 Stop-JsonServer -JsonServerProcess $processes.ServerProcess -NodeProcess $processes.NodeProcess
@@ -749,7 +749,7 @@ Describe "AuthTests" -Tag @('Auth','ScenarioTest') {
             try {
                 $processes = Start-JsonServer -TestRootPath $PSScriptRoot -TestApiName "AuthTests" -TestMiddlewareFileNames 'AuthTestMiddleware.js' `
                                               -CustomServerParameters "--auth .\ApiKeyWithQuery.js" # Contains function to verify a hardcoded API key in the query
-                Get-ResponseWithApiKey -APIKey "abc123" -Property "test"
+                Get-Response -APIKey "abc123" -Property "test"
             }
             finally {
                 Stop-JsonServer -JsonServerProcess $processes.ServerProcess -NodeProcess $processes.NodeProcess
@@ -759,7 +759,7 @@ Describe "AuthTests" -Tag @('Auth','ScenarioTest') {
         It "Allows clearing security requirement at operation level" {
             try {
                 $processes = Start-JsonServer -TestRootPath $PSScriptRoot -TestApiName "AuthTests" -TestMiddlewareFileNames 'AuthTestMiddleware.js'
-                Get-ResponseNoAuth -Property "test"
+                Get-Response -Property "test"
             }
             finally {
                 Stop-JsonServer -JsonServerProcess $processes.ServerProcess -NodeProcess $processes.NodeProcess
@@ -1138,7 +1138,7 @@ Describe "Output type scenario tests" -Tag @('OutputType','ScenarioTest')  {
     }
 
     It 'Test output type of swagger operation which supports x-ms-pageable' {
-        $CommandInfo = Get-Command -Name Get-IotHubResourceEventHubConsumerGroup -Module $ModuleName
+        $CommandInfo = Get-Command -Name Get-IotHubResource -Module $ModuleName
         $CommandInfo.OutputType.Type.ToString() | Should BeExactly 'System.String'
     }
 }
